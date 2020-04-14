@@ -1,19 +1,17 @@
-package chat6;
+package chat7_Proj;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.SocketException;
 
-//서버가 Echo시켜준 메세지를 클라이언트에서 출력
-public class Receiver extends Thread {
-	
+//클라이언트가 작성한 메세지를 읽음
+public class Receiver extends Thread{
 	Socket socket;
 	BufferedReader in = null;
 	
 	public Receiver(Socket socket) {
 		this.socket = socket;
-		
 		try {
 			in = new BufferedReader(new InputStreamReader
 					(this.socket.getInputStream()));
@@ -25,13 +23,11 @@ public class Receiver extends Thread {
 	
 	@Override
 	public void run() {
-		
-		//소켓이 종료되면 while()문을 벗어나서 input스트림을 종료한다.
-		while(in != null) {
+		while(in!=null) {
 			try {
 				System.out.println("Thread Receive:" + in.readLine());
 			}
-			catch(SocketException ne) {
+			catch(SocketException se) {
 				System.out.println("SocketException");
 				break;
 			}

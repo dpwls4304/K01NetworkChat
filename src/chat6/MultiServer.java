@@ -12,7 +12,6 @@ import java.util.Map;
 
 public class MultiServer {
 
-		
 	static ServerSocket serverSocket = null;
 	static Socket socket = null;
 	
