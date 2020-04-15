@@ -11,25 +11,18 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import chat7_Proj.db.DBConnection;
+
 public class MultiServer {
 	static ServerSocket serverSocket = null;
 	static Socket socket = null;
 	Map<String, PrintWriter> clientMap;
+	private DBConnection db;
 	
 	public MultiServer() {
 		clientMap = new HashMap<String, PrintWriter>();
 		Collections.synchronizedMap(clientMap);//동기화설정, 쓰레드의 동시접근 차단
-		try {
-			db(clientMap);
-		}
-		catch(Exception e) {
-			System.out.println("DB연동실패:" + e);
-		}
-	}
-	
-	public void db(Map<String, PrintWriter> clientMap)
-			throws ClassNotFoundException, SQLException{
-		Class.forName("oracle.jdbc.OracleDriver");
+		//db = new DBConnection(clientMap);
 	}
 	
 	public void init() {
@@ -123,6 +116,16 @@ public class MultiServer {
 					
 					System.out.println(name + ">>" + s);//-----------//
 					sendtoAll(name, s);
+					
+					//--------------접속자명단 /list---------------
+					if(s.equals("/list")) {
+						Iterator<String> itr = clientMap.keySet().iterator();
+						System.out.println("[접속자 명단]");
+						while(itr.hasNext()) {
+							PrintWriter list = (PrintWriter)clientMap.get(itr.next());
+							list.println();
+						}
+					}
 				}
 			}
 			catch(Exception e) {
