@@ -6,19 +6,7 @@ public class DBInsert extends DBConImpl{
 	public String chat;
 	
 	public DBInsert() {
-		super("kosmo", "1234");
-		try {
-			String query = "CREATE TABLE chating_tb VALUES("
-						+ " sequence number(38),"
-						+ " name varchar2(10),"
-						+ " what varchar2(999),"
-						+ " when varchar2(100))";
-			psmt = con.prepareStatement(query);
-			psmt.executeUpdate();
-		}
-		catch(Exception e) {
-			System.out.print("테이블 생성 실패");
-		}
+		
 	}
 	
 	public DBInsert(String name, String chat) {
