@@ -5,24 +5,24 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.SQLException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import chat7_Proj.db.DBConnection;
+import chat7_Proj.db.DBInsert;
 
 public class MultiServer {
 	static ServerSocket serverSocket = null;
 	static Socket socket = null;
 	Map<String, PrintWriter> clientMap;
-	private DBConnection db;
+	DBInsert db;
 	
 	public MultiServer() {
 		clientMap = new HashMap<String, PrintWriter>();
 		Collections.synchronizedMap(clientMap);//동기화설정, 쓰레드의 동시접근 차단
-		//db = new DBConnection(clientMap);
 	}
 	
 	public void init() {
@@ -62,7 +62,7 @@ public class MultiServer {
 			try {
 				PrintWriter itr_out = (PrintWriter)clientMap.get(itr.next());
 				if(name.equals("")) {
-					itr_out.println(msg);
+					itr_out.println(URLEncoder.encode(msg, "UTF-8"));
 				}
 				else {
 					itr_out.println("[" + name + "]:" + msg);
@@ -84,13 +84,12 @@ public class MultiServer {
 		public MultiServerT(Socket socket) {
 			this.socket = socket;
 			try {
-				out = new PrintWriter(this.socket.getOutputStream(),
-						true);
+				out = new PrintWriter(this.socket.getOutputStream(),true);
 				in = new BufferedReader(new InputStreamReader(
-						this.socket.getInputStream()));
+										this.socket.getInputStream(), "UTF-8"));
 			}
 			catch(Exception e) {
-				System.out.println("예외발생:" + e);
+				System.out.println("예외발생>>멀티서버T:" + e);
 			}
 		}
 		
@@ -100,7 +99,8 @@ public class MultiServer {
 			String s = "";
 			
 			try {
-				name = in.readLine();
+				name = in.readLine();//이름읽음
+				name = URLDecoder.decode(name, "UTF-8");
 				sendtoAll("", name + "님이 입장하셨습니다.");
 				clientMap.put(name, out);
 				
@@ -110,21 +110,32 @@ public class MultiServer {
 				
 				while(in!=null) {
 					System.out.println(">>");
-					s = in.readLine();
+					s = in.readLine();//채팅내용읽음
+					s = URLDecoder.decode(s, "UTF-8");
 					if(s==null)
 						break;
 					
-					System.out.println(name + ">>" + s);//-----------//
+					System.out.println(name + ">>" + s);
 					sendtoAll(name, s);
 					
-					//--------------접속자명단 /list---------------
+					db = new DBInsert(name,s);//------객체 생성, 값 삽입
+					db.execute();//------------인서트문 접속------------
+					
+					//--------------접속자명단 /list---------------//
 					if(s.equals("/list")) {
 						Iterator<String> itr = clientMap.keySet().iterator();
-						System.out.println("[접속자 명단]");
+						String sys1 = "현재 접속중인 사람은";
+						String sys2 = "입니다.";
+						
+						System.out.println(sys1);
+						out.println(sys1);
 						while(itr.hasNext()) {
-							PrintWriter list = (PrintWriter)clientMap.get(itr.next());
-							list.println();
+							String key = itr.next();
+							System.out.println(key);
+							out.println(key);
 						}
+						System.out.println(sys2);
+						out.println(sys2);
 					}
 				}
 			}
@@ -143,6 +154,7 @@ public class MultiServer {
 					in.close();
 					out.close();
 					socket.close();
+					//**DBDelete();
 				}
 				catch(Exception e) {
 					e.printStackTrace();

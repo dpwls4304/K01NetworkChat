@@ -1,7 +1,9 @@
 package chat7_Proj;
 
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.net.URLEncoder;
 import java.util.Scanner;
 
 //클라이언트 창에 메세지를 출력
@@ -26,7 +28,10 @@ public class Sender extends Thread{
 		Scanner scan = new Scanner(System.in);
 		//run2
 		try {
-			out.println(name);
+			try {
+				out.println(URLEncoder.encode(name, "UTF-8"));//이름
+			}
+			catch(UnsupportedEncodingException e1) {}
 			
 			//run1
 			while(out != null) {
@@ -36,7 +41,7 @@ public class Sender extends Thread{
 						break;
 					}
 					else {
-						out.println(s);
+						out.println(URLEncoder.encode(s, "UTF-8"));//채팅
 					}
 				}
 				catch(Exception e) {
